@@ -2,6 +2,8 @@
 
 from importlib import metadata
 
+from .protocol import Resp3Reader, write_command
+
 try:
     __version__ = metadata.version(__name__)
 except Exception:  # pragma: no cover
