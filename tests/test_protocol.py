@@ -90,3 +90,13 @@ def test_big_number(reader):
     """It parses big numbers correctly."""
     reader.feed(b"(3492890328409238509324850943850943825024385\r\n")
     assert reader.get_object() == 3492890328409238509324850943850943825024385
+
+
+@pytest.mark.parametrize("command_data", redis_commands.items())
+def test_write_command(command_data):
+    """It packs the command correctly."""
+    command, data = command_data
+    actual = protocol.write_command(*command.split(b" "))
+    expected = data["encoded"]
+
+    assert actual == expected

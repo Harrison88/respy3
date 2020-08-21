@@ -48,7 +48,7 @@ redis_commands = {
         ),
     },
     b"GET nonexistent": {
-        "encoded": b"*2\r\n$3\r\nGET\r\n$11\r\nnonexistant\r\n",
+        "encoded": b"*2\r\n$3\r\nGET\r\n$11\r\nnonexistent\r\n",
         "response": b"_\r\n",
         "response_value": None,
     },
