@@ -4,7 +4,7 @@ import tempfile
 
 import nox
 
-nox.options.sessions = "tests"
+nox.options.sessions = ("tests",)
 
 
 @nox.session(python=["3.8"])
