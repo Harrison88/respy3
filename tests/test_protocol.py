@@ -8,7 +8,7 @@ object is returned.
 import pytest
 
 from respy3 import protocol
-from redis_commands import redis_commands
+from .redis_commands import redis_commands
 
 
 @pytest.fixture
