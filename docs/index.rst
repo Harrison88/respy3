@@ -29,7 +29,7 @@ Respy3's usage looks like:
    >>> import respy3
    >>> reader = respy3.Resp3Reader()
    >>> reader.feed(b"+PONG\r\n")
-   >>> reader.parse()
+   >>> reader.get_object()
    b'PONG'
    >>> respy3.write_command(b"HELLO", b"3")
    b'*2\r\n$5\r\nHELLO\r\n$1\r\n3\r\n'
