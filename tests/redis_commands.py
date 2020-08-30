@@ -1,5 +1,5 @@
 # flake8: noqa
-from respy3.protocol import RedisError
+from respy3.protocol import RedisError, RespPush
 
 redis_commands = {
     b"HELLO 3": {
@@ -76,5 +76,20 @@ redis_commands = {
         "encoded": b"*2\r\n$8\r\nSMEMBERS\r\n$5\r\na_set\r\n",
         "response": b"~1\r\n$11\r\nsuper_value\r\n",
         "response_value": {b"super_value"},
+    },
+    b"SUBSCRIBE test_channel": {
+        "encoded": b"*2\r\n$9\r\nSUBSCRIBE\r\n$12\r\ntest_channel\r\n",
+        "response": b">3\r\n$9\r\nsubscribe\r\n$12\r\ntest_channel\r\n:1\r\n",
+        "response_value": RespPush([b"subscribe", b"test_channel", 1]),
+    },
+    b"PUBSUB CHANNELS": {
+        "encoded": b"*2\r\n$6\r\nPUBSUB\r\n$8\r\nCHANNELS\r\n",
+        "response": b"*1\r\n$12\r\ntest_channel\r\n",
+        "response_value": [b"test_channel"],
+    },
+    b"UNSUBSCRIBE test_channel": {
+        "encoded": b"*2\r\n$11\r\nUNSUBSCRIBE\r\n$12\r\ntest_channel\r\n",
+        "response": b">3\r\n$11\r\nunsubscribe\r\n$12\r\ntest_channel\r\n:0\r\n",
+        "response_value": RespPush([b"unsubscribe", b"test_channel", 0]),
     },
 }

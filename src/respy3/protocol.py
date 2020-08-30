@@ -27,6 +27,28 @@ class ProtocolError(Exception):
     """An error occurred while parsing."""
 
 
+class RespPush:
+    """Represents push data received from the Redis server.
+
+    Attributes:
+        push_type (bytes): The type of the push, like "subscribe" or "message".
+        data (list): The data sent in the push.
+    """
+
+    def __init__(self, data):
+        """Initializes the RespPush by separating the push type from the data."""
+        self.push_type = data.pop(0)
+        self.data = data
+
+    def __repr__(self):
+        """Represent the RespPush, including the push_type and the data."""
+        return f"RespPush(push_type={self.push_type}, data={self.data})"
+
+    def __eq__(self, other):
+        """They are equal if they have the same push_type and data."""
+        return self.push_type, self.data == other.push_type, other.data
+
+
 class Resp3Reader:
     """This class parses RESP3 responses from the Redis server.
 
@@ -59,6 +81,7 @@ class Resp3Reader:
             ord("="): self.parse_verbatim_string,
             ord("("): self.parse_big_number,
             ord("~"): self.parse_set,
+            ord(">"): self.parse_push,
         }
 
     def feed(self, data: bytes):
@@ -437,6 +460,27 @@ class Resp3Reader:
             state["object"].add(self.parse(state=state))
 
         return state["object"]
+
+    def parse_push(self, state: t.Optional[dict] = None) -> RespPush:
+        """Parse a RESP3 push (byte: >) into a RespPush object.
+
+        Arguments:
+            state (dict): If this is passed, parsing will resume from where it
+                left off.
+
+        Returns:
+            A RespPush object containing the push type and the parsed list.
+        """
+        if state is None:
+            state = {"function": self.parse_push, "object": []}
+
+        if "length" not in state:
+            state["length"] = int(self.eat_linebreak(state=state))
+
+        while len(state["object"]) < state["length"]:
+            state["object"].append(self.parse(state=state))
+
+        return RespPush(state["object"])
 
 
 def write_command(command: bytes, *args: bytes) -> bytes:
