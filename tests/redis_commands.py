@@ -92,4 +92,12 @@ redis_commands = {
         "response": b">3\r\n$11\r\nunsubscribe\r\n$12\r\ntest_channel\r\n:0\r\n",
         "response_value": RespPush([b"unsubscribe", b"test_channel", 0]),
     },
+    b"STRALGO LCS STRINGS Hello,world! Hello,Redis! IDX": {
+        "encoded": b"*6\r\n$7\r\nSTRALGO\r\n$3\r\nLCS\r\n$7\r\nSTRINGS\r\n$12\r\nHello,world!\r\n$12\r\nHello,Redis!\r\n$3\r\nIDX\r\n",
+        "response": b"%2\r\n$7\r\nmatches\r\n*3\r\n*2\r\n*2\r\n:11\r\n:11\r\n*2\r\n:11\r\n:11\r\n*2\r\n*2\r\n:10\r\n:10\r\n*2\r\n:8\r\n:8\r\n*2\r\n*2\r\n:0\r\n:5\r\n*2\r\n:0\r\n:5\r\n$3\r\nlen\r\n:8\r\n",
+        "response_value": {
+            b"matches": [[[11, 11], [11, 11]], [[10, 10], [8, 8]], [[0, 5], [0, 5]]],
+            b"len": 8,
+        },
+    },
 }

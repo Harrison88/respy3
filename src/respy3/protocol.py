@@ -58,6 +58,9 @@ class Resp3Reader:
             has been parsed yet.
         state_stack (list): A stack that keeps track of the state, allowing
             restarting after more data has been fed.
+        new_state_stack (list): A stack that is built during the run, then copied
+            over to state_stack if there wasn't enough data. Then, state_stack will
+            be used to pick up where it left off next time get_object is called.
         types (dict): A mapping of parser functions related to a particular byte.
     """
 
@@ -66,6 +69,7 @@ class Resp3Reader:
         self._buffer = bytearray()
         self.sentinel = object()
         self.state_stack: t.List[dict] = []
+        self.new_state_stack: t.List[dict] = []
 
         self.types = {
             ord("%"): self.parse_map,
@@ -110,11 +114,11 @@ class Resp3Reader:
             NotEnoughDataError: Not enough data is in the buffer.
         """
         if state:
-            self.state_stack.append(state)
+            self.new_state_stack.append(state)
         if len(self._buffer) < num_bytes:
             raise NotEnoughDataError
         if state:
-            self.state_stack.pop()
+            self.new_state_stack.pop()
         data = self._buffer[:num_bytes]
         del self._buffer[:num_bytes]
         return bytes(data)
@@ -138,10 +142,10 @@ class Resp3Reader:
         """
         linebreak = b"\r\n"
 
-        self.state_stack.append(state)
+        self.new_state_stack.append(state)
         if linebreak not in self._buffer:
             raise NotEnoughDataError
-        self.state_stack.pop()
+        self.new_state_stack.pop()
 
         index = self._buffer.index(linebreak)
         data = self.eat(index + 2)
@@ -159,6 +163,8 @@ class Resp3Reader:
         try:
             return self.parse(check_state=True)
         except NotEnoughDataError:
+            self.state_stack = self.new_state_stack
+            self.new_state_stack = []
             return self.sentinel
 
     def parse(self, check_state: bool = True, state: t.Optional[dict] = None):
@@ -181,20 +187,20 @@ class Resp3Reader:
         if check_state and self.state_stack:
             checked_state = self.state_stack.pop(0)
             if state:
-                self.state_stack.append(state)
+                self.new_state_stack.append(state)
             result = checked_state["function"](state=checked_state)
             if state:
-                self.state_stack.pop()
+                self.new_state_stack.pop()
             return result
 
         object_type = self.eat(1, state=state)
 
         if state:
-            self.state_stack.append(state)
+            self.new_state_stack.append(state)
         object_parser = self.types[ord(object_type)]
         result = object_parser()
         if state:
-            self.state_stack.pop()
+            self.new_state_stack.pop()
         return result
 
     def parse_map(self, state: t.Optional[dict] = None):
