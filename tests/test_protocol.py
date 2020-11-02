@@ -24,6 +24,8 @@ def test_command_responses(reader, command_data):
     reader.feed(command_data["response"])
     result = reader.get_object()
     assert result == command_data["response_value"]
+    assert reader.state_stack == []
+    assert reader.new_state_stack == []
 
 
 @pytest.mark.parametrize("command_data", redis_commands.values())
@@ -43,6 +45,8 @@ def test_command_responses_one_byte(reader, command_data):
     result = reader.get_object()
     print("Got result:", result)
     assert result == command_data["response_value"]
+    assert reader.state_stack == []
+    assert reader.new_state_stack == []
 
 
 @pytest.mark.parametrize("command_data", redis_commands.values())
@@ -61,6 +65,8 @@ def test_command_responses_two_bytes(reader, command_data):
 
     result = reader.get_object()
     assert result == command_data["response_value"]
+    assert reader.state_stack == []
+    assert reader.new_state_stack == []
 
 
 def test_boolean(reader):
