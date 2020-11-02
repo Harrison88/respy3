@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "respy3"
-version = "0.4.0"
+version = "0.5.0"
 description = "A RESP3 protocol parser for Python"
 authors = ["Harrison Morgan <harrison.morgan@gmail.com>"]
 license = "bsd-3-clause"
